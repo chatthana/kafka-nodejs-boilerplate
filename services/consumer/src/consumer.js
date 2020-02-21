@@ -1,6 +1,6 @@
 const moment = require('moment');
 const uuidv4 = require('uuid/v4');
-const kafka = require('kafka-node');
+const { KafkaClient, Consumer } = require('kafka-node');
 const { Client: PgClient } = require('pg');
 const type = require('./type');
 
@@ -8,9 +8,16 @@ const type = require('./type');
   const pgClient = new PgClient();
   await pgClient.connect();
 
-  const kafkaClientOptions = { sessionTimeout: 100, spinDelay: 100, retries: 2 };
-  const kafkaClient = new kafka.Client(process.env.KAFKA_ZOOKEEPER_CONNECT, 'consumer-client', kafkaClientOptions);
-  
+  const kafkaClientOptions = {
+    kafkaHost: process.env.KAFKA_BROKER_CONNECT,
+    connectRetryOptions: {
+      retries: 3,
+      minTimeout: 10000
+    }
+  };
+
+  const kafkaClient = new KafkaClient(kafkaClientOptions);
+
   const topics = [
     { topic: 'sales-topic' }
   ];
@@ -21,8 +28,8 @@ const type = require('./type');
     fetchMaxBytes: 1024 * 1024,
     encoding: 'buffer'
   };
-  
-  const kafkaConsumer = new kafka.HighLevelConsumer(kafkaClient, topics, options);
+
+  const kafkaConsumer = new Consumer(kafkaClient, topics, options);
   
   kafkaConsumer.on('message', async function(message) {
     console.log('Message received:', message);

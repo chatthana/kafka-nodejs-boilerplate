@@ -45,11 +45,13 @@ services:
       PGPASSWORD: ${POSTGRES_PASSWORD}
       PRODUCER_PORT: ${PRODUCER_PORT}
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_BROKER_CONNECT: kafka:9092
     ports:
       - ${PRODUCER_PORT}:${PRODUCER_PORT}
   consumer:
     build: ./services/consumer
     container_name: kafka-nodejs-example-consumer
+    restart: on-failure
     command: sh -c "dockerize -wait tcp://zookeeper:2181 -wait tcp://kafka:9092 -wait tcp://database:5432 npm start"
     depends_on:
       - zookeeper
@@ -62,3 +64,4 @@ services:
       PGDATABASE: ${POSTGRES_USER}
       PGPASSWORD: ${POSTGRES_PASSWORD}
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_BROKER_CONNECT: kafka:9092

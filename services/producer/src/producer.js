@@ -2,16 +2,19 @@ const _ = require('underscore');
 const bodyParser = require('body-parser');
 const express = require('express');
 const Router = require('express-promise-router');
-const kafka = require('kafka-node');
+const { KafkaClient, HighLevelProducer } = require('kafka-node');
 const { Client: PgClient } = require('pg');
 const type = require('./type');
 
 const pgClient = new PgClient();
 pgClient.connect();
 
-const kafkaClientOptions = { sessionTimeout: 100, spinDelay: 100, retries: 2 };
-const kafkaClient = new kafka.Client(process.env.KAFKA_ZOOKEEPER_CONNECT, 'producer-client', kafkaClientOptions);
-const kafkaProducer = new kafka.HighLevelProducer(kafkaClient);
+const kafkaClientOptions = {
+  kafkaHost: process.env.KAFKA_BROKER_CONNECT,
+};
+
+const kafkaClient = new KafkaClient(kafkaClientOptions);
+const kafkaProducer = new HighLevelProducer(kafkaClient);
 
 kafkaClient.on('error', (error) => console.error('Kafka client error:', error));
 kafkaProducer.on('error', (error) => console.error('Kafka producer error:', error));
