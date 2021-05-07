@@ -15,6 +15,6 @@
     "express-promise-router": "3.0.2",
     "kafka-node": "5.0.0",
     "pg": "7.4.3",
-    "underscore": "1.9.1"
+    "underscore": "1.12.1"
   }
 }
